@@ -1,12 +1,9 @@
 import json
 import requests
-from dotenv import dotenv_values
-
-config = dotenv_values('.venv.templates')
+from config import config
 
 
-def lowprice(amount: str, city: str) -> str:
-
+def get(amount: str, city: str, min_price: int = 1, max_price: int = 100) -> str:
     amount = int(amount)
 
     url = "https://hotels4.p.rapidapi.com/"
@@ -26,7 +23,11 @@ def lowprice(amount: str, city: str) -> str:
              "X-RapidAPI-Host": "hotels4.p.rapidapi.com"}
     }
 
-    response = requests.request("GET", f'{url}{endpoints.get("search")}', headers=headers.get('search'), params=querystring)
+    response = requests.request(
+        "GET", f'{url}{endpoints.get("search")}',
+        headers=headers.get("search"), params=querystring
+    )
+
     data = json.loads(response.text)
     rid = data.get('rid')
 
@@ -37,13 +38,13 @@ def lowprice(amount: str, city: str) -> str:
         "siteId": 300000001,
         "destination": {"regionId": rid},
         "checkInDate": {
-            "day": 10,
-            "month": 10,
+            "day": 26,
+            "month": 12,
             "year": 2022
         },
         "checkOutDate": {
-            "day": 15,
-            "month": 10,
+            "day": 27,
+            "month": 12,
             "year": 2022
         },
         "rooms": [
@@ -56,13 +57,18 @@ def lowprice(amount: str, city: str) -> str:
         "resultsSize": amount,
         "sort": "PRICE_LOW_TO_HIGH",
         "filters": {"price": {
-            "max": 150,
-            "min": 1
+            "max": max_price,
+            "min": min_price
         }}
     }
 
-    response = requests.request("POST", f'{url}{endpoints.get("list")}', json=payload, headers=headers.get('list'))
+    response = requests.request(
+        "POST", f'{url}{endpoints.get("list")}',
+        json=payload, headers=headers.get("list")
+    )
+
     data = json.loads(response.text)
+    # print(data)
 
     hotel_list = data['data']['propertySearch']['properties']
 
