@@ -18,6 +18,7 @@ prices = {'/lowprice': {'max': 100,
 def call_start(call: CallbackQuery):
     start(call.message)
 
+
 @bot.message_handler(commands=['start'])
 @add_msg
 def start(message: Message):
@@ -28,6 +29,7 @@ def start(message: Message):
     markup = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, row_width=1)
     msg = bot.send_message(message.chat.id, text='Что будем смотреть?', reply_markup=markup)
     messages.append(msg)
+
 
 @bot.callback_query_handler(func=lambda call: call.data in ['lowprice', 'highprice', 'bestdeal'])
 # @bot.message_handler(commands=['lowprice', 'highprice', 'bestdeal'])
@@ -40,6 +42,7 @@ def city_request(call: CallbackQuery):
         data['command'] = call.data
     msg = bot.send_message(call.from_user.id, "Введите название города")
     messages.append(msg)
+
 
 @bot.message_handler(state=UserState.city)
 @add_msg
@@ -56,6 +59,7 @@ def max_price_request(message):
             bot.set_state(message.from_user.id, UserState.distance, message.chat.id)
             quantity_request(message)
 
+
 @bot.message_handler(state=UserState.max_price)
 @add_msg
 def min_price_request(message):
@@ -71,6 +75,7 @@ def min_price_request(message):
             msg = bot.send_message(message.from_user.id, 'Упс..'
                                                          '\nЧто то не так, давайте попробуем еще раз')
             messages.append(msg)
+
 
 @bot.message_handler(state=UserState.min_price)
 @add_msg
@@ -96,6 +101,7 @@ def check_min_price(message):
                                                          '\nЧто то не так, давайте попробуем еще раз')
             messages.append(msg)
 
+
 @bot.message_handler(state=UserState.check_price)
 @add_msg
 def distance_request(message):
@@ -110,6 +116,7 @@ def distance_request(message):
                                                          '\nЧто то не так, давайте попробуем еще раз')
             messages.append(msg)
 
+
 @bot.message_handler(state=UserState.distance)
 @add_msg
 def quantity_request(message):
@@ -117,6 +124,7 @@ def quantity_request(message):
     bot.set_state(message.from_user.id, UserState.quantity, message.chat.id)
     msg = bot.send_message(message.from_user.id, "Сколько отелей показать?")
     messages.append(msg)
+
 
 @bot.message_handler(state=UserState.quantity)
 @add_msg
@@ -128,6 +136,7 @@ def show_photo(message):
     msg = bot.send_message(message.from_user.id, "Сколько фото показать по каждому отелю?"
                                                  "\nЕсли фото не нужны введите 0?")
     messages.append(msg)
+
 
 @bot.message_handler(state=UserState.show_photo)
 @add_msg

@@ -74,7 +74,7 @@ def get_top(user_data: dict, price_in: dict) -> list[str | list[InputMediaPhoto]
 
     querystring["q"]: str = user_data['city']
     payload["filters"]["price"]: dict = price_in
-    low_to_high: bool = user_data['command'] == '/highprice'
+    low_to_high: bool = user_data['command'] == 'highprice'
 
     data: dict = make_request()
 
