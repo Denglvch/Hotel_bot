@@ -70,7 +70,7 @@ def get_collection(user_data: dict, hotel_list: list) -> list:
             yield text
 
 
-def get_top(user_data: dict, price_in: dict) -> list[str | list[InputMediaPhoto]] | list[str]:
+def get_top(user_data: dict, price_in: dict) -> list[str | list[InputMediaPhoto]] | list[str] | str:
 
     querystring["q"]: str = user_data['city']
     payload["filters"]["price"]: dict = price_in

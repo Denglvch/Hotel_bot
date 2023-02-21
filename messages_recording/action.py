@@ -23,4 +23,5 @@ def del_msg():
                 pass
     messages.clear()
 
+
 messages: list = list()

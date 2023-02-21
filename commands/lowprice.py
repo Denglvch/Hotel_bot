@@ -160,5 +160,5 @@ def reply(message):
         #     for msg in get_result:
         #         messages.append(msg)
 
-        switch(bot, message, get_result)
+        switch(message, get_result)
 
