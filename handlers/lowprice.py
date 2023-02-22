@@ -3,7 +3,7 @@ from telebot.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, C
 
 import api
 from states.state_info import UserState
-from messages_recording.action import add_msg, del_msg, messages
+from messages_recording.action import recording_msg, del_msg, messages
 from pagination.switch import switch
 
 prices = {'/lowprice': {'max': 100,
@@ -14,13 +14,13 @@ prices = {'/lowprice': {'max': 100,
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'start')
-@add_msg
+@recording_msg
 def call_start(call: CallbackQuery):
     start(call.message)
 
 
 @bot.message_handler(commands=['start'])
-@add_msg
+@recording_msg
 def start(message: Message):
 
     lowprice = InlineKeyboardButton(text='Самые низкие цены', callback_data='lowprice')
@@ -32,8 +32,8 @@ def start(message: Message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data in ['lowprice', 'highprice', 'bestdeal'])
-# @bot.message_handler(commands=['lowprice', 'highprice', 'bestdeal'])
-@add_msg
+# @bot.message_handler(handlers=['lowprice', 'highprice', 'bestdeal'])
+@recording_msg
 def city_request(call: CallbackQuery):
     del_msg()
     bot.reset_data(call.from_user.id, call.message.id)
@@ -45,7 +45,7 @@ def city_request(call: CallbackQuery):
 
 
 @bot.message_handler(state=UserState.city)
-@add_msg
+@recording_msg
 def max_price_request(message):
     del_msg()
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -61,7 +61,7 @@ def max_price_request(message):
 
 
 @bot.message_handler(state=UserState.max_price)
-@add_msg
+@recording_msg
 def min_price_request(message):
     del_msg()
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -78,7 +78,7 @@ def min_price_request(message):
 
 
 @bot.message_handler(state=UserState.min_price)
-@add_msg
+@recording_msg
 def check_min_price(message):
     del_msg()
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -103,7 +103,7 @@ def check_min_price(message):
 
 
 @bot.message_handler(state=UserState.check_price)
-@add_msg
+@recording_msg
 def distance_request(message):
     del_msg()
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -118,7 +118,7 @@ def distance_request(message):
 
 
 @bot.message_handler(state=UserState.distance)
-@add_msg
+@recording_msg
 def quantity_request(message):
     del_msg()
     bot.set_state(message.from_user.id, UserState.quantity, message.chat.id)
@@ -127,7 +127,7 @@ def quantity_request(message):
 
 
 @bot.message_handler(state=UserState.quantity)
-@add_msg
+@recording_msg
 def show_photo(message):
     del_msg()
     bot.set_state(message.from_user.id, UserState.show_photo, message.chat.id)
@@ -139,7 +139,7 @@ def show_photo(message):
 
 
 @bot.message_handler(state=UserState.show_photo)
-@add_msg
+@recording_msg
 def reply(message):
     del_msg()
     check = False

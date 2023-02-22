@@ -1,5 +1,5 @@
 from loader import bot
-import commands
+import handlers
 
 
 if __name__ == "__main__":

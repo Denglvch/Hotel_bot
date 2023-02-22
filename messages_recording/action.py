@@ -1,8 +1,11 @@
+from telebot.apihelper import ApiTelegramException
+
 from loader import bot
 from telebot.types import Message, CallbackQuery
+from contextlib import suppress
 
 
-def add_msg(func):
+def recording_msg(func):
     def get_msg(message: Message | CallbackQuery):
         if isinstance(message, CallbackQuery):
             messages.append(message.message)
@@ -17,10 +20,13 @@ def add_msg(func):
 def del_msg():
     for msg in messages:
         if messages:
-            try:
+            with suppress(ApiTelegramException):
                 bot.delete_message(msg.chat.id, msg.message_id)
-            except:
-                pass
+            # try:
+            #     bot.delete_message(msg.chat.id, msg.message_id)
+            # except ApiTelegramException as ex:
+            #     raise ex
+            #     pass
     messages.clear()
 
 
