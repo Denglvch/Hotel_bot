@@ -1,38 +1,57 @@
 from loader import bot
 from telebot.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 
 import api
 from states.state_info import UserState
 from messages_recording.action import recording_msg, del_msg, messages
 from pagination.switch import switch
+from datetime import date
 
-prices = {'/lowprice': {'max': 100,
-                        'min': 1},
-          '/highprice': {'max': 9999,
-                         'min': 100},
-          }
+prices = {
+    '/lowprice': {'max': 100,
+                  'min': 1},
+    '/highprice': {'max': 9999,
+                   'min': 100},
+}
+
+ru_steps = {
+    'year': 'год',
+    'month': 'месяц',
+    'day': 'день'
+}
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'start')
-@recording_msg
-def call_start(call: CallbackQuery):
-    start(call.message)
+# print(LSTEP)
+
+
+def markup(photo=False):
+    keyboard = [
+        InlineKeyboardButton(text=num, callback_data=num)
+        for num
+        in range(3, 11)
+    ]
+    buttons = InlineKeyboardMarkup().add(*keyboard, row_width=8)
+    if photo:
+        no_photo = InlineKeyboardButton(text='Без фото', callback_data='0')
+        buttons.add(no_photo)
+
+    return buttons
 
 
 @bot.message_handler(commands=['start'])
 @recording_msg
 def start(message: Message):
-
     lowprice = InlineKeyboardButton(text='Самые низкие цены', callback_data='lowprice')
     highprice = InlineKeyboardButton(text='Самые высокие цены', callback_data='highprice')
     bestdeal = InlineKeyboardButton(text='Лучшие цены по расположению', callback_data='bestdeal')
-    markup = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, row_width=1)
-    msg = bot.send_message(message.chat.id, text='Что будем смотреть?', reply_markup=markup)
+    buttons = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, row_width=1)
+    msg = bot.send_message(message.chat.id, text='Что будем смотреть?', reply_markup=buttons)
+    bot.set_state(message.from_user.id, UserState.start, message.chat.id)
     messages.append(msg)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in ['lowprice', 'highprice', 'bestdeal'])
-# @bot.message_handler(handlers=['lowprice', 'highprice', 'bestdeal'])
+@bot.callback_query_handler(state=UserState.start, func=lambda call: call.data)
 @recording_msg
 def city_request(call: CallbackQuery):
     del_msg()
@@ -46,18 +65,91 @@ def city_request(call: CallbackQuery):
 
 @bot.message_handler(state=UserState.city)
 @recording_msg
-def max_price_request(message):
-    del_msg()
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data['city'] = message.text
-        if data['command'] == 'bestdeal':
-            bot.set_state(message.from_user.id, UserState.max_price, message.chat.id)
-            msg = bot.send_message(message.from_user.id, "Напишите максимальную цену для поиска"
-                                                         "\nПример: 250")
-            messages.append(msg)
+def calendar_start(message: Message | CallbackQuery):
+    if isinstance(message, CallbackQuery):
+        chat_id = message.message.chat.id
+    else:
+        chat_id = message.chat.id
+    with bot.retrieve_data(message.from_user.id, chat_id) as data:
+        if not data.get('city'):
+            data['city'] = message.text
+        if data.get('date_in'):
+            data['move'] = 'выезда'
         else:
-            bot.set_state(message.from_user.id, UserState.distance, message.chat.id)
-            quantity_request(message)
+            data['move'] = 'заезда'
+    del_msg()
+    bot.set_state(message.from_user.id, UserState.calendar_start, chat_id)
+    calendar_obj = DetailedTelegramCalendar(min_date=date.today())
+    calendar, step = calendar_obj.build()
+    msg = bot.send_message(
+        chat_id,
+        f"Выберите {ru_steps[LSTEP[step]]} {data['move']}",
+        reply_markup=calendar
+    )
+    messages.append(msg)
+
+
+@bot.callback_query_handler(state=UserState.calendar_start, func=DetailedTelegramCalendar.func())
+def calendar_steps(calendar):
+    result, key, step = DetailedTelegramCalendar().process(calendar.data)
+    with bot.retrieve_data(calendar.from_user.id, calendar.message.chat.id) as data:
+        pass
+    if not result and key:
+        msg = bot.edit_message_text(f"Выберите {ru_steps[LSTEP[step]]} {data['move']}",
+                                    calendar.message.chat.id,
+                                    calendar.message.message_id,
+                                    reply_markup=key)
+        messages.append(msg)
+    elif result:
+        bot.set_state(calendar.from_user.id, UserState.calendar_check, calendar.message.chat.id)
+        if data.get('date_in'):
+            data['date_out'] = result
+        else:
+            data['date_in'] = result
+        button_ok = InlineKeyboardButton(text='Продолжить', callback_data='ok')
+        button_rewrite = InlineKeyboardButton(text='Выбрать заново', callback_data='rewrite')
+        keyboard = InlineKeyboardMarkup().add(button_ok, button_rewrite, row_width=2)
+        bot.edit_message_text(
+            f"Вы выбрали дату {data['move']}: {result}",
+            calendar.message.chat.id,
+            calendar.message.id,
+            reply_markup=keyboard
+        )
+
+
+@bot.callback_query_handler(state=UserState.calendar_check, func=lambda call: call.data)
+def calendar_check(call):
+    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
+        pass
+
+    if data.get('date_out') and call.data == 'ok':
+        bot.set_state(call.from_user.id, UserState.calendar_ok, call.message.chat.id)
+        max_price_request(call)
+    else:
+        if call.data == 'rewrite':
+            if data.get('date_out'):
+                data['date_out'] = None
+            else:
+                data['date_in'] = None
+
+        bot.set_state(call.from_user.id, UserState.city, call.message.chat.id)
+        calendar_start(call)
+
+
+@bot.message_handler(state=UserState.calendar_ok)
+@recording_msg
+def max_price_request(call: CallbackQuery):
+    del_msg()
+    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
+        pass
+    if data['command'] == 'bestdeal':
+        bot.set_state(call.from_user.id, UserState.max_price, call.message.chat.id)
+        msg = bot.send_message(call.from_user.id, "Напишите максимальную цену для поиска"
+                                                  "\nПример: 250")
+        messages.append(msg)
+    else:
+        bot.set_state(call.from_user.id, UserState.distance, call.message.chat.id)
+        quantity_request(call)
 
 
 @bot.message_handler(state=UserState.max_price)
@@ -119,46 +211,47 @@ def distance_request(message):
 
 @bot.message_handler(state=UserState.distance)
 @recording_msg
-def quantity_request(message):
+def quantity_request(message: Message | CallbackQuery):
+    if isinstance(message, CallbackQuery):
+        chat_id = message.message.chat.id
+    else:
+        chat_id = message.chat.id
     del_msg()
-    bot.set_state(message.from_user.id, UserState.quantity, message.chat.id)
-    msg = bot.send_message(message.from_user.id, "Сколько отелей показать?")
+    bot.set_state(message.from_user.id, UserState.quantity, chat_id)
+    msg = bot.send_message(
+        message.from_user.id,
+        text="Сколько отелей показать?",
+        reply_markup=markup()
+    )
     messages.append(msg)
 
 
-@bot.message_handler(state=UserState.quantity)
+@bot.callback_query_handler(state=UserState.quantity, func=lambda call: call.data)
 @recording_msg
-def show_photo(message):
+def show_photo(call):
     del_msg()
-    bot.set_state(message.from_user.id, UserState.show_photo, message.chat.id)
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data['quantity'] = int(message.text)
-    msg = bot.send_message(message.from_user.id, "Сколько фото показать по каждому отелю?"
-                                                 "\nЕсли фото не нужны введите 0?")
+    bot.set_state(call.from_user.id, UserState.show_photo, call.message.chat.id)
+    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
+        data['quantity'] = int(call.data)
+
+    msg = bot.send_message(
+        call.from_user.id,
+        text="Сколько фото показать по каждому отелю?",
+        reply_markup=markup(photo=True)
+    )
     messages.append(msg)
 
 
-@bot.message_handler(state=UserState.show_photo)
+@bot.callback_query_handler(state=UserState.show_photo, func=lambda call: call.data)
 @recording_msg
-def reply(message):
+def reply(call):
     del_msg()
-    check = False
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        if message.text.isdigit():
-            data['show_photo'] = int(message.text)
-            check = True
-        else:
-            msg = bot.send_message(message.from_user.id, 'Упс..'
-                                                         '\nЧто то не так, давайте попробуем еще раз')
-            messages.append(msg)
-    if check:
-        msg = bot.send_message(message.chat.id, 'Минуточку...')
-        messages.append(msg)
-        price_in = prices.get(data['command'], data.get('prices'))
-        get_result = api.top_price.get_top(data, price_in)
-        # if data['show_photo']:
-        #     for msg in get_result:
-        #         messages.append(msg)
+    bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
+    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
+        data['show_photo'] = int(call.data)
+    msg = bot.send_message(call.message.chat.id, 'Минуточку...')
+    messages.append(msg)
+    price_in = prices.get(data['command'], data.get('prices'))
+    get_result = api.get_answ.get_top(data, price_in)
 
-        switch(message, get_result)
-
+    switch(call.message, get_result)

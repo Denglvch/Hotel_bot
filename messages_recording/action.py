@@ -12,21 +12,16 @@ def recording_msg(func):
         else:
             messages.append(message)
         del_msg()
-        return func(message)
+        func(message)
 
     return get_msg
 
 
 def del_msg():
-    for msg in messages:
-        if messages:
+    if messages:
+        for msg in messages:
             with suppress(ApiTelegramException):
                 bot.delete_message(msg.chat.id, msg.message_id)
-            # try:
-            #     bot.delete_message(msg.chat.id, msg.message_id)
-            # except ApiTelegramException as ex:
-            #     raise ex
-            #     pass
     messages.clear()
 
 
