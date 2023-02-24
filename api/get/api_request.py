@@ -2,7 +2,7 @@ from requests import request
 from api.api_data import url, endpoints, headers, querystring, payload
 
 
-def make_request() -> dict:
+def get_api_request() -> dict:
     city_search = request(
         "GET", f'{url.get("url")}{endpoints.get("search")}',
         headers=headers.get("search"), params=querystring

@@ -1,16 +1,27 @@
 from datetime import datetime
 from config import config
 
-check_in_out = {'date_in': datetime.today(),
-                'date_out': datetime.today()}
+check_in_out: dict = {
+    'date_in': datetime.today(),
+    'date_out': datetime.today()
+}
 
-url: dict = {'url': "https://hotels4.p.rapidapi.com/"}
+url: dict = {
+    'url': "https://hotels4.p.rapidapi.com/"
+}
 
-endpoints: dict = {'search': 'locations/v3/search',
-                   'list': 'properties/v2/list',
-                   'detail': 'properties/v2/detail'}
+endpoints: dict = {
+    'search': 'locations/v3/search',
+    'list': 'properties/v2/list',
+    'detail': 'properties/v2/detail'
+}
 
-querystring: dict = {"q": 'new york', "locale": "ru_RU", "langid": "1033", "siteid": "300000001"}
+querystring: dict = {
+    "q": 'new york',
+    "locale": "ru_RU",
+    "langid": "1033",
+    "siteid": "300000001"
+}
 
 headers: dict = {
     'search':

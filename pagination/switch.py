@@ -1,22 +1,20 @@
 from loader import bot
-# from telebot import TeleBot
 from telebot.types import Message, CallbackQuery
 from telegram_bot_pagination import InlineKeyboardPaginator, InlineKeyboardButton
 
 from messages_recording.action import del_msg, messages
 
 
-def switch(message: Message, data: list):
+def switch(message: Message, data: list) -> None:
 
     @bot.callback_query_handler(func=lambda call: call.data)
-    def characters_page_callback(call: CallbackQuery):
+    def characters_page_callback(call: CallbackQuery) -> None:
         if not call.data == 'start':
             page = int(call.data.split('#')[1])
             del_msg()
             send_page(call.message, page)
 
-
-    def send_page(message, page=1):
+    def send_page(message: Message, page: int = 1) -> None:
         messages.append(message)
         paginator = InlineKeyboardPaginator(
             len(data),

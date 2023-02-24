@@ -5,7 +5,7 @@ from telebot.types import InputMediaPhoto
 from api.api_data import payload_mini, url, endpoints, headers
 
 
-def get_photo(hotel_id, amount_photo) -> list[InputMediaPhoto]:
+def get_photo(hotel_id: str, amount_photo: int) -> list[InputMediaPhoto]:
     payload_mini['propertyId'] = hotel_id
     photos = request(
         "POST", f'{url.get("url")}{endpoints.get("detail")}',

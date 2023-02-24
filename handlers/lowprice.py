@@ -22,10 +22,7 @@ ru_steps = {
 }
 
 
-# print(LSTEP)
-
-
-def markup(photo=False):
+def markup(photo: bool = False) -> InlineKeyboardMarkup:
     keyboard = [
         InlineKeyboardButton(text=num, callback_data=num)
         for num
@@ -40,13 +37,13 @@ def markup(photo=False):
 
 
 @bot.callback_query_handler(state=UserState.switch, func=lambda call: call.data == 'start')
-def callback_start(call):
+def callback_start(call: CallbackQuery) -> None:
     start(call)
 
 
 @bot.message_handler(commands=['start'])
 @recording_msg
-def start(message: Message | CallbackQuery):
+def start(message: Message | CallbackQuery) -> None:
     if isinstance(message, CallbackQuery):
         chat_id = message.message.chat.id
     else:
@@ -63,7 +60,7 @@ def start(message: Message | CallbackQuery):
 
 @bot.callback_query_handler(state=UserState.start, func=lambda call: call.data)
 @recording_msg
-def city_request(call: CallbackQuery):
+def city_request(call: CallbackQuery) -> None:
     del_msg()
 
     bot.set_state(call.from_user.id, UserState.city, call.message.chat.id)
@@ -75,7 +72,7 @@ def city_request(call: CallbackQuery):
 
 @bot.message_handler(state=UserState.city)
 @recording_msg
-def calendar_start(message: Message | CallbackQuery):
+def calendar_start(message: Message | CallbackQuery) -> None:
     if isinstance(message, CallbackQuery):
         chat_id = message.message.chat.id
     else:
@@ -100,18 +97,18 @@ def calendar_start(message: Message | CallbackQuery):
 
 
 @bot.callback_query_handler(state=UserState.calendar_start, func=DetailedTelegramCalendar.func())
-def calendar_steps(calendar):
-    result, key, step = DetailedTelegramCalendar().process(calendar.data)
-    with bot.retrieve_data(calendar.from_user.id, calendar.message.chat.id) as data:
+def calendar_steps(call: CallbackQuery) -> None:
+    result, key, step = DetailedTelegramCalendar().process(call.data)
+    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         pass
     if not result and key:
         msg = bot.edit_message_text(f"Выберите {ru_steps[LSTEP[step]]} {data['move']}",
-                                    calendar.message.chat.id,
-                                    calendar.message.message_id,
+                                    call.message.chat.id,
+                                    call.message.message_id,
                                     reply_markup=key)
         messages.append(msg)
     elif result:
-        bot.set_state(calendar.from_user.id, UserState.calendar_check, calendar.message.chat.id)
+        bot.set_state(call.from_user.id, UserState.calendar_check, call.message.chat.id)
         if data.get('date_in'):
             data['date_out'] = result
         else:
@@ -121,14 +118,14 @@ def calendar_steps(calendar):
         keyboard = InlineKeyboardMarkup().add(button_ok, button_rewrite, row_width=2)
         bot.edit_message_text(
             f"Вы выбрали дату {data['move']}: {result}",
-            calendar.message.chat.id,
-            calendar.message.id,
+            call.message.chat.id,
+            call.message.id,
             reply_markup=keyboard
         )
 
 
 @bot.callback_query_handler(state=UserState.calendar_check, func=lambda call: call.data)
-def calendar_check(call):
+def calendar_check(call: CallbackQuery) -> None:
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         pass
 
@@ -148,7 +145,7 @@ def calendar_check(call):
 
 @bot.message_handler(state=UserState.calendar_ok)
 @recording_msg
-def max_price_request(call: CallbackQuery):
+def max_price_request(call: CallbackQuery) -> None:
     del_msg()
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         pass
@@ -164,7 +161,7 @@ def max_price_request(call: CallbackQuery):
 
 @bot.message_handler(state=UserState.max_price)
 @recording_msg
-def min_price_request(message):
+def min_price_request(message: Message) -> None:
     del_msg()
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         if message.text.isdigit():
@@ -176,14 +173,14 @@ def min_price_request(message):
         else:
             msg = bot.send_message(message.from_user.id, 'Упс..'
                                                          '\nЧто то не так, давайте попробуем еще раз'
-                                                         '\nИзбегайте любых символов кроме цифр' 
+                                                         '\nИзбегайте любых символов кроме цифр'
                                                          '\nПример: 75')
             messages.append(msg)
 
 
 @bot.message_handler(state=UserState.min_price)
 @recording_msg
-def check_min_price(message):
+def check_min_price(message: Message) -> None:
     del_msg()
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         if message.text.isdigit():
@@ -203,14 +200,14 @@ def check_min_price(message):
         else:
             msg = bot.send_message(message.from_user.id, 'Упс..'
                                                          '\nЧто то не так, давайте попробуем еще раз'
-                                                         '\nИзбегайте любых символов кроме цифр' 
+                                                         '\nИзбегайте любых символов кроме цифр'
                                                          '\nПример: 75')
             messages.append(msg)
 
 
 @bot.message_handler(state=UserState.check_price)
 @recording_msg
-def distance_request(message):
+def distance_request(message: Message) -> None:
     del_msg()
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         if message.text.isdigit():
@@ -220,14 +217,14 @@ def distance_request(message):
         else:
             msg = bot.send_message(message.from_user.id, 'Упс..'
                                                          '\nЧто то не так, давайте попробуем еще раз'
-                                                         '\nИзбегайте любых символов кроме цифр' 
+                                                         '\nИзбегайте любых символов кроме цифр'
                                                          '\nПример: 75')
             messages.append(msg)
 
 
 @bot.message_handler(state=UserState.distance)
 @recording_msg
-def quantity_request(message: Message | CallbackQuery):
+def quantity_request(message: Message | CallbackQuery) -> None:
     if isinstance(message, CallbackQuery):
         chat_id = message.message.chat.id
     else:
@@ -244,7 +241,7 @@ def quantity_request(message: Message | CallbackQuery):
 
 @bot.callback_query_handler(state=UserState.quantity, func=lambda call: call.data)
 @recording_msg
-def show_photo(call):
+def show_photo(call: CallbackQuery) -> None:
     del_msg()
     bot.set_state(call.from_user.id, UserState.show_photo, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
@@ -260,7 +257,7 @@ def show_photo(call):
 
 @bot.callback_query_handler(state=UserState.show_photo, func=lambda call: call.data)
 @recording_msg
-def reply(call):
+def reply(call: CallbackQuery) -> None:
     del_msg()
     bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
