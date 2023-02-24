@@ -1,4 +1,4 @@
-from api.get_photo.get import take_photo
+from api.get.photo import get_photo
 
 
 def get_collection(user_data: dict, hotel_list: list) -> list:
@@ -12,7 +12,7 @@ def get_collection(user_data: dict, hotel_list: list) -> list:
                 f'\nЦена за {all_days} ночей: {all_days * int(price.lstrip("$"))}'
                 f'\nРасстояние до центра: {distance} км')
         if user_data['show_photo']:
-            photos = take_photo(hotel.get('id'), user_data['show_photo'])
+            photos = get_photo(hotel.get('id'), user_data['show_photo'])
             result = [text, photos]
             yield result
         else:

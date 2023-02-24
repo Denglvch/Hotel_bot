@@ -2,7 +2,7 @@ from loader import bot
 from telebot.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 
-import api
+from api.api_process import process
 from states.state_info import UserState
 from messages_recording.action import recording_msg, del_msg, messages
 from pagination.switch import switch
@@ -39,15 +39,25 @@ def markup(photo=False):
     return buttons
 
 
+@bot.callback_query_handler(state=UserState.switch, func=lambda call: call.data == 'start')
+def callback_start(call):
+    start(call)
+
+
 @bot.message_handler(commands=['start'])
 @recording_msg
-def start(message: Message):
+def start(message: Message | CallbackQuery):
+    if isinstance(message, CallbackQuery):
+        chat_id = message.message.chat.id
+    else:
+        chat_id = message.chat.id
+    bot.reset_data(message.from_user.id, chat_id)
     lowprice = InlineKeyboardButton(text='Самые низкие цены', callback_data='lowprice')
     highprice = InlineKeyboardButton(text='Самые высокие цены', callback_data='highprice')
     bestdeal = InlineKeyboardButton(text='Лучшие цены по расположению', callback_data='bestdeal')
     buttons = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, row_width=1)
-    msg = bot.send_message(message.chat.id, text='Что будем смотреть?', reply_markup=buttons)
-    bot.set_state(message.from_user.id, UserState.start, message.chat.id)
+    msg = bot.send_message(chat_id, text='Что будем смотреть?', reply_markup=buttons)
+    bot.set_state(message.from_user.id, UserState.start, chat_id)
     messages.append(msg)
 
 
@@ -55,7 +65,7 @@ def start(message: Message):
 @recording_msg
 def city_request(call: CallbackQuery):
     del_msg()
-    bot.reset_data(call.from_user.id, call.message.id)
+
     bot.set_state(call.from_user.id, UserState.city, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['command'] = call.data
@@ -165,7 +175,9 @@ def min_price_request(message):
             messages.append(msg)
         else:
             msg = bot.send_message(message.from_user.id, 'Упс..'
-                                                         '\nЧто то не так, давайте попробуем еще раз')
+                                                         '\nЧто то не так, давайте попробуем еще раз'
+                                                         '\nИзбегайте любых символов кроме цифр' 
+                                                         '\nПример: 75')
             messages.append(msg)
 
 
@@ -190,7 +202,9 @@ def check_min_price(message):
                 messages.append(msg)
         else:
             msg = bot.send_message(message.from_user.id, 'Упс..'
-                                                         '\nЧто то не так, давайте попробуем еще раз')
+                                                         '\nЧто то не так, давайте попробуем еще раз'
+                                                         '\nИзбегайте любых символов кроме цифр' 
+                                                         '\nПример: 75')
             messages.append(msg)
 
 
@@ -205,7 +219,9 @@ def distance_request(message):
             quantity_request(message)
         else:
             msg = bot.send_message(message.from_user.id, 'Упс..'
-                                                         '\nЧто то не так, давайте попробуем еще раз')
+                                                         '\nЧто то не так, давайте попробуем еще раз'
+                                                         '\nИзбегайте любых символов кроме цифр' 
+                                                         '\nПример: 75')
             messages.append(msg)
 
 
@@ -252,6 +268,6 @@ def reply(call):
     msg = bot.send_message(call.message.chat.id, 'Минуточку...')
     messages.append(msg)
     price_in = prices.get(data['command'], data.get('prices'))
-    get_result = api.get_answ.get_top(data, price_in)
+    get_result = process(data, price_in)
 
     switch(call.message, get_result)
