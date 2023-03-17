@@ -1,3 +1,4 @@
+from database.db_write import db_add_user
 from loader import bot
 from telebot.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
@@ -42,6 +43,7 @@ def callback_start(call: CallbackQuery) -> None:
 
 
 @bot.message_handler(commands=['start'])
+@db_add_user
 @recording_msg
 def start(message: Message | CallbackQuery) -> None:
     if isinstance(message, CallbackQuery):
