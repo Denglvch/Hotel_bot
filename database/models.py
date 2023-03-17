@@ -1,5 +1,6 @@
-from peewee import *
+from datetime import datetime
 
+from peewee import *
 
 db = SqliteDatabase('history.db')
 
@@ -21,5 +22,5 @@ class UserRequest(BaseModel):
         db_table = 'user_requests'
 
     user_id = ForeignKeyField(User)
-    date = DateTimeField().default
+    date = DateTimeField(default=datetime.now)
     request = TextField()

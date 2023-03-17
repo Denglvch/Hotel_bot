@@ -1,10 +1,9 @@
 from collections.abc import Callable
-
-from peewee import *
-from telebot.types import Message, CallbackQuery, InputMediaPhoto
-
-from database.models import db, User, UserRequest
 from json import dumps
+
+from telebot.types import Message, CallbackQuery
+
+from database.models import User, UserRequest
 
 
 def db_add_user(func) -> Callable:
@@ -21,11 +20,24 @@ def db_add_user(func) -> Callable:
     return add
 
 
-def db_add_response(func) -> Callable:
-    def add(*args, **kwargs) -> list[str | list[InputMediaPhoto]] | list[str] | str:
-        response = func(*args, **kwargs)
-        data = dumps({'response': response})
-        user = User.get(user_id=kwargs['user_id'])
-        UserRequest(user_id=user, request=data).save()
-        return response
+def db_add_response(func: Callable) -> Callable:
+    def add(*args, **kwargs) -> list:
+        result = None
+        if func.__name__ == 'process':
+            result = func(*args, **kwargs)
+            kwargs['in_db'] = True
+
+        user_data: dict = args[0]
+        if not user_data.get('command') == 'history':
+            if kwargs.get('in_db'):
+                data = dumps({'response': user_data.get('response')}, ensure_ascii=False)
+                user = User.get(user_id=user_data['user_id'])
+                UserRequest(user_id=user, request=data).save()
+            else:
+                if not user_data.get('response'):
+                    user_data['response'] = list()
+                user_data.get('response').append([kwargs['text'], kwargs['photo_links']])
+        if not result:
+            result = func(*args, **kwargs)
+        return result
     return add

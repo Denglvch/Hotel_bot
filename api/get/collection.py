@@ -1,4 +1,17 @@
+from telebot.types import InputMediaPhoto
+
 from api.get.photo import get_photo
+from database.db_write import db_add_response
+
+
+@db_add_response
+def create_collection(user_data: dict, text: str = None, photo_links: list = None, in_db=False) -> list:
+    mediagroup = [
+        InputMediaPhoto(media=photo)
+        for photo
+        in photo_links
+    ]
+    return [text, mediagroup]
 
 
 def get_collection(user_data: dict, hotel_list: list) -> list:
@@ -13,7 +26,8 @@ def get_collection(user_data: dict, hotel_list: list) -> list:
                 f'\nРасстояние до центра: {distance} км')
         if user_data['show_photo']:
             photos = get_photo(hotel.get('id'), user_data['show_photo'])
-            result = [text, photos]
-            yield result
+            yield create_collection(user_data, text=text, photo_links=photos)
+            # result = [text, photos]
+            # yield result
         else:
             yield text

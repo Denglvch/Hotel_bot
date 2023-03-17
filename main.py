@@ -1,6 +1,6 @@
+from database.models import db, User, UserRequest
 from loader import bot
 import handlers
-from database.models import db, User, UserRequest
 
 
 if __name__ == "__main__":

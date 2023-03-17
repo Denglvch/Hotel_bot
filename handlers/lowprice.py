@@ -1,13 +1,14 @@
-from database.db_write import db_add_user
-from loader import bot
+from datetime import date
+
 from telebot.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 
 from api.api_process import process
-from states.state_info import UserState
+from database.db_write import db_add_user
+from loader import bot
 from messages_recording.action import recording_msg, del_msg, messages
 from pagination.switch import switch
-from datetime import date
+from states.state_info import UserState
 
 prices = {
     '/lowprice': {'max': 100,
@@ -67,6 +68,7 @@ def city_request(call: CallbackQuery) -> None:
 
     bot.set_state(call.from_user.id, UserState.city, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
+        data['user_id'] = call.from_user.id
         data['command'] = call.data
     msg = bot.send_message(call.from_user.id, "Введите название города")
     messages.append(msg)
@@ -264,9 +266,9 @@ def reply(call: CallbackQuery) -> None:
     bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['show_photo'] = int(call.data)
+        data['price_in'] = prices.get(data['command'], data.get('prices'))
     msg = bot.send_message(call.message.chat.id, 'Минуточку...')
     messages.append(msg)
-    price_in = prices.get(data['command'], data.get('prices'))
-    get_result = process(data, price_in)
+    get_result = process(data)
 
     switch(call.message, get_result)

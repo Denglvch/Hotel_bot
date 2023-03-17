@@ -1,14 +1,17 @@
 from telebot.types import InputMediaPhoto
+
 from api.api_data import check_in_out, querystring, payload
 from api.filter import filter_by_distance
 from api.get import api_request, collection
+from database.db_write import db_add_response
 
 
-def process(user_data: dict, price_in: dict) -> list[str | list[InputMediaPhoto]] | list[str] | str:
+@db_add_response
+def process(user_data: dict) -> list[str | list[InputMediaPhoto]] | list[str] | str:
 
     check_in_out['date_in'], check_in_out['date_out'] = user_data['date_in'], user_data['date_out']
     querystring["q"]: str = user_data['city']
-    payload["filters"]["price"]: dict = price_in
+    payload["filters"]["price"]: dict = user_data['price_in']
     low_to_high: bool = user_data['command'] == 'highprice'
 
     city_request: dict = api_request.get_api_request()

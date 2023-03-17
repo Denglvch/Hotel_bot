@@ -1,11 +1,11 @@
 from random import sample
 
 from requests import request
-from telebot.types import InputMediaPhoto
+
 from api.api_data import payload_mini, url, endpoints, headers
 
 
-def get_photo(hotel_id: str, amount_photo: int) -> list[InputMediaPhoto]:
+def get_photo(hotel_id: str, amount_photo: int) -> list:
     payload_mini['propertyId'] = hotel_id
     photos = request(
         "POST", f'{url.get("url")}{endpoints.get("detail")}',
@@ -20,8 +20,4 @@ def get_photo(hotel_id: str, amount_photo: int) -> list[InputMediaPhoto]:
         in sample(all_img, amount_photo)
     ]
 
-    return [
-        InputMediaPhoto(media=photo)
-        for photo
-        in list_of_links
-    ]
+    return list_of_links
