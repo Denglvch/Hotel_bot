@@ -23,6 +23,12 @@ ru_steps = {
     'day': 'день'
 }
 
+text_command = {
+    'lowprice': 'Самые низкие цены',
+    'highprice': 'Самые высокие цены',
+    'bestdeal': 'Лучшие цены по расположению'
+}
+
 
 def markup(photo: bool = False) -> InlineKeyboardMarkup:
     keyboard = [
@@ -70,6 +76,7 @@ def city_request(call: CallbackQuery) -> None:
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['user_id'] = call.from_user.id
         data['command'] = call.data
+        data['text_command'] = text_command[call.data]
     msg = bot.send_message(call.from_user.id, "Введите название города")
     messages.append(msg)
 
@@ -267,6 +274,12 @@ def reply(call: CallbackQuery) -> None:
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['show_photo'] = int(call.data)
         data['price_in'] = prices.get(data['command'], data.get('prices'))
+        data['text_response'] = (
+            f'{data.get("text_command")} '
+            f'для {data.get("city")}, '
+            f'отелей: {data.get("quantity")}, '
+            f'{data.get("show_photo") or "без"} фото'
+        )
     msg = bot.send_message(call.message.chat.id, 'Минуточку...')
     messages.append(msg)
     get_result = process(data)

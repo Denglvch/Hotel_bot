@@ -30,14 +30,33 @@ def db_add_response(func: Callable) -> Callable:
         user_data: dict = args[0]
         if not user_data.get('command') == 'history':
             if kwargs.get('in_db'):
-                data = dumps({'response': user_data.get('response')}, ensure_ascii=False)
-                user = User.get(user_id=user_data['user_id'])
-                UserRequest(user_id=user, request=data).save()
+                # text_response = (
+                #     f'{user_data.get("text_command")} '
+                #     f'для {user_data.get("city")}, '
+                #     f'отелей: {user_data.get("quantity")}, '
+                #     f'{user_data.get("show_photo") or "без"} фото'
+                # )
+                data = dumps(
+                    {'response': user_data.get('response')},
+                    ensure_ascii=False
+                )
+                # user = User.get(user_id=user_data['user_id'])
+                UserRequest(
+                    user_id=User.get(user_id=user_data['user_id']),
+                    text=user_data['text_response'],
+                    request=data
+                ).save()
             else:
-                if not user_data.get('response'):
-                    user_data['response'] = list()
-                user_data.get('response').append([kwargs['text'], kwargs['photo_links']])
-        if not result:
-            result = func(*args, **kwargs)
-        return result
+                # if not user_data.get('response'):
+                #     user_data['response'] = list()
+                if kwargs.get('photo_links'):
+                    data_in = [kwargs['text'], kwargs.get('photo_links')]
+                else:
+                    data_in = kwargs['text']
+                user_data.get(
+                    'response',
+                    user_data.update({'response': list()})
+                ).append(data_in)
+
+        return result or func(*args, **kwargs)
     return add

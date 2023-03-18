@@ -5,16 +5,18 @@ from database.db_write import db_add_response
 
 
 @db_add_response
-def create_collection(user_data: dict, text: str = None, photo_links: list = None, in_db=False) -> list:
-    mediagroup = [
-        InputMediaPhoto(media=photo)
-        for photo
-        in photo_links
-    ]
-    return [text, mediagroup]
+def create_collection(user_data: dict, text: str = None, photo_links: list = None, in_db=False) -> list | str:
+    if photo_links:
+        mediagroup = [
+            InputMediaPhoto(media=photo)
+            for photo
+            in photo_links
+        ]
+        return [text, mediagroup]
+    return text
 
 
-def get_collection(user_data: dict, hotel_list: list) -> list:
+def get_collection(user_data: dict, hotel_list: list) -> list | str:
     all_days = (user_data['date_out'] - user_data['date_in']).days
     for hotel in hotel_list:
         name = hotel['name']
@@ -30,4 +32,4 @@ def get_collection(user_data: dict, hotel_list: list) -> list:
             # result = [text, photos]
             # yield result
         else:
-            yield text
+            yield create_collection(user_data, text=text)

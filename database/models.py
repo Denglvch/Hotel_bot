@@ -22,5 +22,6 @@ class UserRequest(BaseModel):
         db_table = 'user_requests'
 
     user_id = ForeignKeyField(User)
-    date = DateTimeField(default=datetime.now)
+    text = TextField()
     request = TextField()
+    date = DateTimeField(default=datetime.now)
