@@ -15,5 +15,6 @@ class UserState(StatesGroup):
     min_price = State()
     max_price = State()
     switch = State()
+    test = State()
 
 

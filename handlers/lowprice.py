@@ -1,3 +1,4 @@
+import datetime
 from datetime import date
 
 from telebot.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
@@ -7,7 +8,7 @@ from api.api_process import process
 from database.db_write import db_add_user
 from loader import bot
 from messages_recording.action import recording_msg, del_msg, messages
-from pagination.switch import switch
+from pagination.switch import page_switcher
 from states.state_info import UserState
 
 prices = {
@@ -61,10 +62,38 @@ def start(message: Message | CallbackQuery) -> None:
     lowprice = InlineKeyboardButton(text='Самые низкие цены', callback_data='lowprice')
     highprice = InlineKeyboardButton(text='Самые высокие цены', callback_data='highprice')
     bestdeal = InlineKeyboardButton(text='Лучшие цены по расположению', callback_data='bestdeal')
-    buttons = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, row_width=1)
+    test_1 = InlineKeyboardButton(text='Test1', callback_data='test1')
+    test_2 = InlineKeyboardButton(text='Test2', callback_data='test2')
+    buttons = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, test_1, test_2, row_width=1)
     msg = bot.send_message(chat_id, text='Что будем смотреть?', reply_markup=buttons)
-    bot.set_state(message.from_user.id, UserState.start, chat_id)
+    # bot.set_state(message.from_user.id, UserState.start, chat_id)
+    bot.set_state(message.from_user.id, UserState.test, chat_id)
     messages.append(msg)
+
+
+@bot.callback_query_handler(state=UserState.test, func=lambda call: call.data)
+@recording_msg
+def test(call: CallbackQuery):
+    del_msg()
+    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
+        pass
+    bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
+    if call.data == 'test1':
+        data.update({'user_id': 47653108, 'command': 'lowprice', 'text_command': 'Самые низкие цены', 'city': 'milan', 'move': 'выезда', 'date_in': datetime.date(2023, 8, 15), 'date_out': datetime.date(2023, 8, 23), 'quantity': 4, 'show_photo': 4, 'price_in': None, 'text_response': 'Самые низкие цены для milan, отелей: 4, 4 фото', 'response': [['\nОтель: Rosa Grand Milano\nЦена за ночь: $288\nЦена за 8 ночей: 2304\nРасстояние до центра: 0.41 км', ['https://images.trvl-media.com/lodging/1000000/10000/2900/2875/e4ba20a7.jpg?impolicy=resizecrop&rw=500&ra=fit', 'https://images.trvl-media.com/lodging/1000000/10000/2900/2875/8796117a.jpg?impolicy=resizecrop&rw=500&ra=fit', 'https://images.trvl-media.com/lodging/1000000/10000/2900/2875/a27dd8c7.jpg?impolicy=resizecrop&rw=500&ra=fit', 'https://images.trvl-media.com/lodging/1000000/10000/2900/2875/03b9382d.jpg?impolicy=resizecrop&rw=500&ra=fit']]]})
+
+        msg = bot.send_message(call.message.chat.id, 'Минуточку...')
+        data['message_list'] = process(data)
+        messages.append(msg)
+        page_switcher(call)
+    elif call.data == 'test2':
+        data.update({'user_id': 47653108, 'command': 'lowprice', 'text_command': 'Самые низкие цены', 'city': 'new york', 'move': 'выезда', 'date_in': datetime.date(2023, 5, 17), 'date_out': datetime.date(2023, 5, 24), 'quantity': 3, 'show_photo': 3, 'price_in': None, 'text_response': 'Самые низкие цены для new york, отелей: 4, 4 фото', 'response': [['\nОтель: Super 8 by Wyndham Jamaica North Conduit\nЦена за ночь: $126\nЦена за 7 ночей: 882\nРасстояние до центра: 12.08 км', ['https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/bb65528c.jpg?impolicy=resizecrop&rw=500&ra=fit', 'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/128cdf7a.jpg?impolicy=resizecrop&rw=500&ra=fit', 'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/f7a48a0c.jpg?impolicy=resizecrop&rw=500&ra=fit', 'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/e24c7506.jpg?impolicy=resizecrop&rw=500&ra=fit']]]})
+        msg = bot.send_message(call.message.chat.id, 'Минуточку...')
+        data['message_list'] = process(data)
+        messages.append(msg)
+        page_switcher(call)
+    else:
+        bot.set_state(call.from_user.id, UserState.start, call.message.chat.id)
+        city_request(call)
 
 
 @bot.callback_query_handler(state=UserState.start, func=lambda call: call.data)
@@ -282,6 +311,16 @@ def reply(call: CallbackQuery) -> None:
         )
     msg = bot.send_message(call.message.chat.id, 'Минуточку...')
     messages.append(msg)
-    get_result = process(data)
+    # get_result = process(data)
+    data['message_list'] = process(data)
+    # print(data)
 
-    switch(call.message, get_result)
+    page_switcher(call)
+
+
+@bot.callback_query_handler(state=UserState.switch, func=lambda call: call.data != 'start')
+def _page_callback(call: CallbackQuery) -> None:
+    if not call.data == 'start':
+        page = int(call.data.split('#')[1])
+        del_msg()
+        page_switcher(call, page)

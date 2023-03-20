@@ -21,7 +21,10 @@ def recording_msg(func: Callable) -> Callable:
 def del_msg() -> None:
     for msg in messages:
         with suppress(ApiTelegramException):
-            bot.delete_message(msg.chat.id, msg.message_id)
+            try:
+                bot.delete_message(msg.chat.id, msg.message_id)
+            except AttributeError:
+                bot.delete_message(msg.message.chat.id, msg.message.message_id)
     messages.clear()
 
 
