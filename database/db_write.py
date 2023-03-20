@@ -28,14 +28,8 @@ def db_add_response(func: Callable) -> Callable:
             kwargs['in_db'] = True
 
         user_data: dict = args[0]
-        if not user_data.get('command') == 'history':
+        if user_data.get('command') != 'history':
             if kwargs.get('in_db'):
-                # text_response = (
-                #     f'{user_data.get("text_command")} '
-                #     f'для {user_data.get("city")}, '
-                #     f'отелей: {user_data.get("quantity")}, '
-                #     f'{user_data.get("show_photo") or "без"} фото'
-                # )
                 data = dumps(
                     {'response': user_data.get('response')},
                     ensure_ascii=False
@@ -47,8 +41,6 @@ def db_add_response(func: Callable) -> Callable:
                     request=data
                 ).save()
             else:
-                # if not user_data.get('response'):
-                #     user_data['response'] = list()
                 if kwargs.get('photo_links'):
                     data_in = [kwargs['text'], kwargs.get('photo_links')]
                 else:
