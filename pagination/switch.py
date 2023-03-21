@@ -1,7 +1,7 @@
-from loader import bot
 from telebot.types import CallbackQuery
 from telegram_bot_pagination import InlineKeyboardPaginator, InlineKeyboardButton
 
+from loader import bot
 from messages_recording.action import messages
 
 
@@ -39,5 +39,3 @@ def page_switcher(call: CallbackQuery, page: int = 1) -> None:
             parse_mode='Markdown'
         )
         messages.append(keyboard)
-
-    # send_page(message)

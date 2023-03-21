@@ -50,12 +50,16 @@ def markup(photo: bool = False) -> InlineKeyboardMarkup:
 
 @bot.callback_query_handler(state=UserState.start, func=lambda call: call.data == 'history')
 @recording_msg
-def history_check(call: CallbackQuery):
+def history_check(call: CallbackQuery) -> None:
     db_response = search_history(call)
     if db_response:
         with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-            data['command'] = call.data # костыль починить в дб райт
-            data['history'] = {str(num): json.loads(old.request) for num, old in enumerate(db_response, 1)}  # optimized need
+            data['command'] = call.data
+            data['history'] = {
+                str(num): json.loads(old.request)
+                for num, old
+                in enumerate(db_response, 1)
+            }
         buttons = [
             InlineKeyboardButton(text=resp.text, callback_data=str(num))
             for num, resp
@@ -67,34 +71,35 @@ def history_check(call: CallbackQuery):
         messages.append(msg)
 
     else:
-        msg = bot.send_message(call.message.chat.id, 'В истории пока ничего нет.\nПопробуйте сделать первый запрос)')
+        bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
+        keyboard = InlineKeyboardMarkup().add((InlineKeyboardButton('Меню бота', callback_data='start')))
+        msg = bot.send_message(call.message.chat.id, 'В истории пока ничего нет.\nПопробуйте сделать первый запрос)',
+                               reply_markup=keyboard)
         messages.append(msg)
-        start(call)
 
 
 @bot.callback_query_handler(state=UserState.history_look, func=lambda call: call.data)
 @recording_msg
-def history_look(call: CallbackQuery):
+def history_look(call: CallbackQuery) -> None:
     del_msg()
     bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         pass
-    text, photo_links = data['history'][call.data]['response'][0] # убрать лишние скобеи при записи в дбрайт
-    print(photo_links)
-    text, mediagroup = [
-        result
-        for result
-        in create_collection(data, text=text, photo_links=photo_links)
-    ]
-    msg = bot.send_message(call.message.chat.id, 'Минуточку...')
-    messages.append(msg)
-
-    media_group = bot.send_media_group(call.message.chat.id, mediagroup)
-    bot.send_message(
-        call.message.chat.id,
-        text=text,
-    )
-
+    response_from_db = data['history'][call.data]['response']
+    if all(isinstance(elem, list) for elem in response_from_db):
+        message_list = [
+            create_collection(user_data=data, text=text, photo_links=photo_links)
+            for text, photo_links
+            in response_from_db
+        ]
+    else:
+        message_list = [
+            create_collection(user_data=data, text=text)
+            for text
+            in response_from_db
+        ]
+    data['message_list'] = message_list
+    page_switcher(call)
 
 
 @bot.callback_query_handler(state=UserState.switch, func=lambda call: call.data == 'start')
@@ -144,7 +149,7 @@ def test(call: CallbackQuery):
                      'https://images.trvl-media.com/lodging/1000000/10000/2900/2875/03b9382d.jpg?impolicy=resizecrop&rw=500&ra=fit']]]})
 
         msg = bot.send_message(call.message.chat.id, 'Минуточку...')
-        data['message_list'] = process(data)
+        data['message_list'] = process(user_data=data)
         messages.append(msg)
         page_switcher(call)
     elif call.data == 'test2':
@@ -153,13 +158,12 @@ def test(call: CallbackQuery):
              'move': 'выезда', 'date_in': datetime.date(2023, 5, 17), 'date_out': datetime.date(2023, 5, 24),
              'quantity': 3, 'show_photo': 3, 'price_in': None,
              'text_response': 'Самые низкие цены для new york, отелей: 4, 4 фото', 'response': [[
-                                                                                                    '\nОтель: Super 8 by Wyndham Jamaica North Conduit\nЦена за ночь: $126\nЦена за 7 ночей: 882\nРасстояние до центра: 12.08 км',
-                                                                                                    [
-                                                                                                        'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/bb65528c.jpg?impolicy=resizecrop&rw=500&ra=fit',
-                                                                                                        'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/128cdf7a.jpg?impolicy=resizecrop&rw=500&ra=fit',
-                                                                                                        'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/f7a48a0c.jpg?impolicy=resizecrop&rw=500&ra=fit',
-                                                                                                        'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/e24c7506.jpg?impolicy=resizecrop&rw=500&ra=fit']]]})
-        # data['show_photo'] = 0
+                '\nОтель: Super 8 by Wyndham Jamaica North Conduit\nЦена за ночь: $126\nЦена за 7 ночей: 882\nРасстояние до центра: 12.08 км',
+                [
+                    'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/bb65528c.jpg?impolicy=resizecrop&rw=500&ra=fit',
+                    'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/128cdf7a.jpg?impolicy=resizecrop&rw=500&ra=fit',
+                    'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/f7a48a0c.jpg?impolicy=resizecrop&rw=500&ra=fit',
+                    'https://images.trvl-media.com/lodging/7000000/6040000/6036600/6036585/e24c7506.jpg?impolicy=resizecrop&rw=500&ra=fit']]]})
         msg = bot.send_message(call.message.chat.id, 'Минуточку...')
         data['message_list'] = process(data)
         messages.append(msg)
@@ -385,7 +389,7 @@ def reply(call: CallbackQuery) -> None:
     msg = bot.send_message(call.message.chat.id, 'Минуточку...')
     messages.append(msg)
     # get_result = process(data)
-    data['message_list'] = process(data)
+    data['message_list'] = process(user_data=data)
     # print(data)
 
     page_switcher(call)

@@ -7,8 +7,10 @@ from database.db_write import db_add_response
 
 
 @db_add_response
-def process(user_data: dict) -> list[str | list[InputMediaPhoto]] | list[str] | str:
+def process(user_data=None) -> list[str | list[InputMediaPhoto]] | list[str] | str:
 
+    if user_data is None:
+        user_data = dict()
     check_in_out['date_in'], check_in_out['date_out'] = user_data['date_in'], user_data['date_out']
     querystring["q"]: str = user_data['city']
     payload["filters"]["price"]: dict = user_data['price_in']

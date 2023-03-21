@@ -1,9 +1,10 @@
+from collections.abc import Callable
+from contextlib import suppress
+
 from telebot.apihelper import ApiTelegramException
+from telebot.types import Message, CallbackQuery
 
 from loader import bot
-from telebot.types import Message, CallbackQuery
-from contextlib import suppress
-from collections.abc import Callable
 
 
 def recording_msg(func: Callable) -> Callable:

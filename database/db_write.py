@@ -21,7 +21,7 @@ def db_add_user(func) -> Callable:
 
 
 def db_add_response(func: Callable) -> Callable:
-    def add(*args, **kwargs) -> list:
+    def add(*args, **kwargs) -> Callable:
         result = None
         if func.__name__ == 'process':
             result = func(*args, **kwargs)
@@ -34,7 +34,6 @@ def db_add_response(func: Callable) -> Callable:
                     {'response': user_data.get('response')},
                     ensure_ascii=False
                 )
-                # user = User.get(user_id=user_data['user_id'])
                 UserRequest(
                     user_id=User.get(user_id=user_data['user_id']),
                     text=user_data['text_response'],
@@ -45,15 +44,8 @@ def db_add_response(func: Callable) -> Callable:
                     data_in = [kwargs['text'], kwargs.get('photo_links')]
                 else:
                     data_in = kwargs['text']
-                # print(user_data.get('response'))
                 if not user_data.get('response'):
                     user_data.update({'response': list()})
                 user_data.get('response').append(data_in)
-
-                # user_data.get(
-                #     'response',
-                #     user_data.update({'response': list()})
-                # ).append(data_in)
-
         return result or func(*args, **kwargs)
     return add
