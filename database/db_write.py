@@ -27,7 +27,7 @@ def db_add_response(func: Callable) -> Callable:
             result = func(*args, **kwargs)
             kwargs['in_db'] = True
 
-        user_data: dict = args[0]
+        user_data: dict = kwargs['user_data']
         if user_data.get('command') != 'history':
             if kwargs.get('in_db'):
                 data = dumps(
@@ -45,10 +45,15 @@ def db_add_response(func: Callable) -> Callable:
                     data_in = [kwargs['text'], kwargs.get('photo_links')]
                 else:
                     data_in = kwargs['text']
-                user_data.get(
-                    'response',
+                # print(user_data.get('response'))
+                if not user_data.get('response'):
                     user_data.update({'response': list()})
-                ).append(data_in)
+                user_data.get('response').append(data_in)
+
+                # user_data.get(
+                #     'response',
+                #     user_data.update({'response': list()})
+                # ).append(data_in)
 
         return result or func(*args, **kwargs)
     return add
