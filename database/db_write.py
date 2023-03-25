@@ -3,7 +3,7 @@ from json import dumps
 
 from telebot.types import Message, CallbackQuery
 
-from database.models import User, UserRequest
+from database.models import User, UserRequest, UserMessage
 
 
 def db_add_user(func) -> Callable:
@@ -18,6 +18,21 @@ def db_add_user(func) -> Callable:
             User(user_id=message.from_user.id).save()
         return func(message)
     return add
+
+
+def db_add_message(message: Message | CallbackQuery) -> None:
+
+    if isinstance(message, CallbackQuery):
+        chat_id = message.message.chat.id
+        message_id = message.message.message_id
+    else:
+        chat_id = message.chat.id
+        message_id = message.message_id
+    UserMessage(
+        user_id=User.get(user_id=message.from_user.id),
+        chat_id=chat_id,
+        message_id=message_id
+    ).save()
 
 
 def db_add_response(func: Callable) -> Callable:

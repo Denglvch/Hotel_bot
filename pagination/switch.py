@@ -1,14 +1,14 @@
 from telebot.types import CallbackQuery
 from telegram_bot_pagination import InlineKeyboardPaginator, InlineKeyboardButton
 
+from database.db_write import db_add_message
 from loader import bot
-from messages_recording.action import messages
 
 
 def page_switcher(call: CallbackQuery, page: int = 1) -> None:
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         message_list = data['message_list']
-    messages.append(call)
+    db_add_message(call)
     paginator = InlineKeyboardPaginator(
         len(message_list),
         current_page=page,
@@ -25,12 +25,12 @@ def page_switcher(call: CallbackQuery, page: int = 1) -> None:
             reply_markup=paginator.markup,
             parse_mode='Markdown'
         )
-        messages.append(msg)
+        db_add_message(msg)
     else:
         text, photo = result[0], result[1]
         media_group = bot.send_media_group(call.message.chat.id, photo)
         for msg_from in media_group:
-            messages.append(msg_from)
+            db_add_message(msg_from)
 
         keyboard = bot.send_message(
             call.message.chat.id,
@@ -38,4 +38,4 @@ def page_switcher(call: CallbackQuery, page: int = 1) -> None:
             reply_markup=paginator.markup,
             parse_mode='Markdown'
         )
-        messages.append(keyboard)
+        db_add_message(keyboard)

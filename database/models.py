@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from peewee import *
+from peewee import SqliteDatabase, Model, IntegerField, ForeignKeyField, TextField, DateTimeField
 
 db = SqliteDatabase('history.db')
 
@@ -25,3 +25,12 @@ class UserRequest(BaseModel):
     text = TextField()
     request = TextField()
     date = DateTimeField(default=datetime.now)
+
+
+class UserMessage(BaseModel):
+    class Meta:
+        db_table = 'user_messages'
+
+    user_id = ForeignKeyField(User, field='user_id')
+    chat_id = IntegerField()
+    message_id = IntegerField()
