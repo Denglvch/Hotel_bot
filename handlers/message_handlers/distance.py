@@ -1,6 +1,6 @@
 from telebot.types import Message
 
-from handlers.customs.quantity import quantity_request
+from handlers.message_handlers.quantity import quantity_request
 from loader import bot
 from messages_recording.action import recording_msg, del_msg, bot_send_message
 from states.state_info import UserState

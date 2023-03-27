@@ -1,6 +1,6 @@
 from telebot.types import CallbackQuery
 
-from handlers.customs.utils.markups import markup
+from handlers.markups import markup
 from loader import bot
 from messages_recording.action import recording_msg, del_msg, bot_send_message
 from states.state_info import UserState

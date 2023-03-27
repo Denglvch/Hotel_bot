@@ -6,11 +6,6 @@ from messages_recording.action import recording_msg, del_msg, bot_send_message
 from states.state_info import UserState
 
 
-@bot.callback_query_handler(state=UserState.switch, func=lambda call: call.data == 'start')
-def callback_start(call: CallbackQuery) -> None:
-    start(call)
-
-
 @bot.message_handler(commands=['start'])
 @db_add_user
 @recording_msg
@@ -30,4 +25,3 @@ def start(message: Message | CallbackQuery) -> None:
     buttons = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, history, test_1, test_2, row_width=1)
     bot_send_message(chat_id, text='Что будем смотреть?', reply_markup=buttons)
     bot.set_state(message.from_user.id, UserState.start, chat_id)
-    # bot.set_state(message.from_user.id, UserState.test, chat_id)
