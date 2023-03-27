@@ -16,3 +16,5 @@ text_command = {
     'highprice': 'Самые высокие цены',
     'bestdeal': 'Лучшие цены по расположению'
 }
+
+messages = list()

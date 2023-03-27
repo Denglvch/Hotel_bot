@@ -25,12 +25,3 @@ class UserRequest(BaseModel):
     text = TextField()
     request = TextField()
     date = DateTimeField(default=datetime.now)
-
-
-class UserMessage(BaseModel):
-    class Meta:
-        db_table = 'user_messages'
-
-    user_id = ForeignKeyField(User, field='user_id')
-    chat_id = IntegerField()
-    message_id = IntegerField()
