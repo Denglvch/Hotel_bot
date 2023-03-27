@@ -26,14 +26,13 @@ def process(user_data=None) -> list[str | list[InputMediaPhoto]] | list[str] | s
             hotel_list: list = hotel_list[:user_data['quantity']]
         else:
             hotel_list: list = hotel_list[:-(user_data['quantity'] + 1):-1]
-        try:
-            return [
-                result
-                for result
-                in collection.get_collection(user_data, hotel_list)
-            ]
-        except IndexError:
-            print("D'oh!")
+
+        return [
+            result
+            for result
+            in collection.get_collection(user_data, hotel_list)
+        ]
+
     else:
         return (':('
                 '\nС такими параметрами ничего не нашлось.'

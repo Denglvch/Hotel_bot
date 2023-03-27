@@ -21,7 +21,7 @@ def create_collection(user_data=None, text: str = None, photo_links: list = None
 def get_collection(user_data: dict, hotel_list: list) -> list | str:
     all_days = (user_data['date_out'] - user_data['date_in']).days
     for hotel in hotel_list:
-        name = hotel['name']
+        name: str = hotel['name']
         price: str = hotel['price']['lead']['formatted']
         distance = hotel['destinationInfo']['distanceFromDestination']['value']
         text = (f'\nОтель: {name}'

@@ -14,10 +14,8 @@ def get_photo(hotel_id: str, amount_photo: int) -> list:
     ).json()
 
     all_img = photos['data']['propertyInfo']['propertyGallery']['images']
-    list_of_links = [
+    return [
         img['image']['url']
         for img
         in sample(all_img, amount_photo)
     ]
-
-    return list_of_links

@@ -13,6 +13,7 @@ from states.state_info import UserState
 def reply(call: CallbackQuery) -> None:
     del_msg(call.message.chat.id)
     bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
+
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['show_photo'] = int(call.data)
         data['price_in'] = prices.get(data['command'], data.get('prices'))
@@ -22,6 +23,11 @@ def reply(call: CallbackQuery) -> None:
             f'отелей: {data.get("quantity")}, '
             f'{data.get("show_photo") or "без"} фото'
         )
+
     bot_send_message(call.message.chat.id, 'Минуточку...')
     data['message_list'] = process(user_data=data)
-    page_switcher(call)
+
+    if isinstance(data['message_list'], str):
+        print(data['message_list'])
+    else:
+        page_switcher(call)
