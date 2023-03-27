@@ -20,7 +20,7 @@ def bot_message_hook(func: Callable) -> Callable:
 
 @bot_message_hook
 def bot_send_message(*args, **kwargs):
-    return bot.send_message(*args, **kwargs)
+    return bot.send_message(*args, disable_notification=True, **kwargs)
 
 
 def recording_msg(func: Callable) -> Callable:

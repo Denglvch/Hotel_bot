@@ -11,4 +11,4 @@ def page_callback(call: CallbackQuery) -> None:
     if not call.data == 'start':
         page = int(call.data.split('#')[1])
         del_msg(call.message.chat.id)
-        page_switcher(call, page)
+        page_switcher(call, page, disable_notification=False)
