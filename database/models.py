@@ -1,6 +1,13 @@
 from datetime import datetime
 
-from peewee import SqliteDatabase, Model, IntegerField, ForeignKeyField, TextField, DateTimeField
+from peewee import (
+    SqliteDatabase,
+    Model,
+    IntegerField,
+    ForeignKeyField,
+    TextField,
+    DateTimeField
+)
 
 db = SqliteDatabase('history.db')
 

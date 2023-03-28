@@ -7,7 +7,9 @@ from database.db_write import db_add_response
 
 
 @db_add_response
-def process(user_data=None) -> list[str | list[InputMediaPhoto]] | list[str] | str:
+def process(
+        user_data=None
+) -> list[str | list[InputMediaPhoto]] | list[str] | str:
 
     if user_data is None:
         user_data = dict()

@@ -7,9 +7,10 @@ def search_history(call: CallbackQuery) -> list:
     user = User.get(user_id=call.from_user.id)
     db_request = (
         UserRequest
-            .select()
-            .limit(10)
-            .where(UserRequest.user_id == user.user_id).order_by(UserRequest.date.desc())
+        .select()
+        .limit(10)
+        .where(UserRequest.user_id == user.user_id)
+        .order_by(UserRequest.date.desc())
     )
     return [
         response

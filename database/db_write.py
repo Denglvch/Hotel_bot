@@ -8,7 +8,12 @@ from database.models import User, UserRequest
 
 def db_add_user(func) -> Callable:
     def add(message: Message | CallbackQuery) -> None:
-        find_user = User.select().limit(1).where(User.user_id == message.from_user.id)
+        find_user = (
+            User
+            .select()
+            .limit(1)
+            .where(User.user_id == message.from_user.id)
+        )
         check_user = [
             user.user_id
             for user

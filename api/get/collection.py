@@ -5,7 +5,13 @@ from database.db_write import db_add_response
 
 
 @db_add_response
-def create_collection(user_data=None, text: str = None, photo_links: list = None, in_db=False) -> list | str:
+def create_collection(
+        user_data=None,
+        text: str = None,
+        photo_links: list = None,
+        in_db=False
+) -> list | str:
+
     if user_data is None:
         user_data = dict()
     if photo_links:
