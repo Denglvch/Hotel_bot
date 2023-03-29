@@ -4,13 +4,14 @@ from telebot.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMar
 
 from database.db_read import search_history
 from loader import bot
-from messages_recording.action import recording_msg, bot_send_message
+from messages_recording.action import recording_msg, bot_send_message, del_msg
 from states.state_info import UserState
 
 
 @bot.callback_query_handler(state=UserState.start, func=lambda call: call.data == 'history')
 @recording_msg
 def history_check(call: CallbackQuery) -> None:
+    del_msg(call.message.chat.id)
     db_response = search_history(call)
     if db_response:
         with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:

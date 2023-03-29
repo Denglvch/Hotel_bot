@@ -17,4 +17,4 @@ text_command = {
     'bestdeal': 'Лучшие цены по расположению'
 }
 
-messages = list()
+messages: dict[int: list[int]] = dict()
