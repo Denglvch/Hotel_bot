@@ -8,6 +8,11 @@ from states.state_info import UserState
 
 @bot.callback_query_handler(state=UserState.switch, func=lambda call: call.data != 'start')
 def page_callback(call: CallbackQuery) -> None:
+    """
+    Pagination helper function, sends a page pointer to the pagination function.
+    :param call:
+    :return: None
+    """
     if not call.data == 'start':
         page = int(call.data.split('#')[1])
         del_msg(call.message.chat.id)

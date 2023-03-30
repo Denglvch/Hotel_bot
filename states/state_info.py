@@ -2,6 +2,9 @@ from telebot.handler_backends import State, StatesGroup
 
 
 class UserState(StatesGroup):
+    """
+    Class describing the states of the user.
+    """
     start = State()
     calendar_start = State()
     calendar_steps = State()
@@ -17,6 +20,3 @@ class UserState(StatesGroup):
     switch = State()
     history_check = State()
     history_look = State()
-    test = State()
-
-

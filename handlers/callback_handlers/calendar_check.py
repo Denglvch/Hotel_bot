@@ -8,6 +8,11 @@ from states.state_info import UserState
 
 @bot.callback_query_handler(state=UserState.calendar_check, func=lambda call: call.data)
 def calendar_check(call: CallbackQuery) -> None:
+    """
+    Function validates the input in the previous step and redirects to the next or returns to the previous one.
+    :param call:
+    :return: None
+    """
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         pass
 

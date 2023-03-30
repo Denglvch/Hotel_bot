@@ -10,6 +10,11 @@ from states.state_info import UserState
 @db_add_user
 @recording_msg
 def start(message: Message | CallbackQuery) -> None:
+    """
+    The main function of starting a dialog. Creates a keyboard with interaction options and sends it.
+    :param message:
+    :return: None
+    """
     if isinstance(message, CallbackQuery):
         chat_id = message.message.chat.id
     else:
@@ -20,8 +25,6 @@ def start(message: Message | CallbackQuery) -> None:
     highprice = InlineKeyboardButton(text='Самые высокие цены', callback_data='highprice')
     bestdeal = InlineKeyboardButton(text='Лучшие цены по расположению', callback_data='bestdeal')
     history = InlineKeyboardButton(text='История поиска', callback_data='history')
-    test_1 = InlineKeyboardButton(text='Test1', callback_data='test1')
-    test_2 = InlineKeyboardButton(text='Test2', callback_data='test2')
-    buttons = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, history, test_1, test_2, row_width=1)
+    buttons = InlineKeyboardMarkup().add(lowprice, highprice, bestdeal, history, row_width=1)
     bot_send_message(chat_id, text='Что будем смотреть?', reply_markup=buttons)
     bot.set_state(message.from_user.id, UserState.start, chat_id)

@@ -11,6 +11,13 @@ from states.state_info import UserState
 @bot.callback_query_handler(state=UserState.show_photo, func=lambda call: call.data)
 @recording_msg
 def reply(call: CallbackQuery) -> None:
+    """
+    The function writes the necessary user data,
+    receives a response from the api based on it,
+    and sends it to the pagination function.
+    :param call:
+    :return: None
+    """
     del_msg(call.message.chat.id)
     bot.set_state(call.from_user.id, UserState.switch, call.message.chat.id)
 

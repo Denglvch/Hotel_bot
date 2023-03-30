@@ -9,6 +9,11 @@ from states.state_info import UserState
 @bot.message_handler(state=UserState.distance)
 @recording_msg
 def quantity_request(message: Message | CallbackQuery) -> None:
+    """
+    The function prompts the user to select the desired number of hotels to display.
+    :param message:
+    :return: None
+    """
     if isinstance(message, CallbackQuery):
         chat_id = message.message.chat.id
     else:

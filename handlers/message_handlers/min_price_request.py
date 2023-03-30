@@ -8,6 +8,12 @@ from states.state_info import UserState
 @bot.message_handler(state=UserState.max_price)
 @recording_msg
 def min_price_request(message: Message) -> None:
+    """
+    Function validates the input in the previous step and prompts the user to enter the min price for the search,
+    or returns to the previous one.
+    :param message:
+    :return: None
+    """
     del_msg(message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         if message.text.isdigit():

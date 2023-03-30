@@ -6,6 +6,12 @@ from messages_recording.action import add_to_messages
 
 
 def page_switcher(call: CallbackQuery, page: int = 1,  disable_notification=True) -> None:
+    """
+    This function collects and sends a new page to the user.
+    :param call:
+    :param page:
+    :param disable_notification:
+    """
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         message_list = data['message_list']
     add_to_messages(call)

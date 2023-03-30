@@ -9,6 +9,12 @@ from states.state_info import UserState
 @bot.message_handler(state=UserState.check_price)
 @recording_msg
 def distance_request(message: Message) -> None:
+    """
+    Function validates the input in the previous step and redirects to the next or returns to the previous one.
+    Also writes the necessary user data.
+    :param message:
+    :return: None
+    """
     del_msg(message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         if message.text.isdigit():

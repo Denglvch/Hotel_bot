@@ -2,6 +2,11 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 def markup(photo: bool = False) -> InlineKeyboardMarkup:
+    """
+    The function creates a standard keyboard and returns it.
+    :param photo:
+    :return: InlineKeyboardMarkup
+    """
     keyboard = [
         InlineKeyboardButton(text=num, callback_data=num)
         for num

@@ -12,6 +12,12 @@ from states.state_info import UserState
 @bot.message_handler(state=UserState.city)
 @recording_msg
 def calendar_start(message: Message | CallbackQuery) -> None:
+    """
+    The function creates a calendar-keyboard and sends it to the user,
+    and also writes the necessary user data.
+    :param message:
+    :return: None
+    """
     if isinstance(message, CallbackQuery):
         chat_id = message.message.chat.id
     else:

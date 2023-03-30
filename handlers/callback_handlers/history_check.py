@@ -11,6 +11,13 @@ from states.state_info import UserState
 @bot.callback_query_handler(state=UserState.start, func=lambda call: call.data == 'history')
 @recording_msg
 def history_check(call: CallbackQuery) -> None:
+    """
+    The function checks if there is a query history for the given user,
+    and if so, displays a textual representation of them to the user,
+    or reports that there is no history.
+    :param call:
+    :return: None
+    """
     del_msg(call.message.chat.id)
     db_response = search_history(call)
     if db_response:

@@ -9,6 +9,12 @@ from states.state_info import UserState
 @bot.message_handler(state=UserState.calendar_ok)
 @recording_msg
 def max_price_request(call: CallbackQuery) -> None:
+    """
+    The function prompts the user to enter the max price for the search.
+    Also writes the necessary user data.
+    :param call:
+    :return: None
+    """
     del_msg(call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         pass

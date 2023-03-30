@@ -8,6 +8,12 @@ from states.state_info import UserState
 
 @bot.callback_query_handler(state=UserState.calendar_start, func=DetailedTelegramCalendar.func())
 def calendar_steps(call: CallbackQuery) -> None:
+    """
+    The function controls the switching of the calendar display mode to select the year, month, day,
+    and also writes the necessary user data.
+    :param call:
+    :return: None
+    """
     result, key, step = DetailedTelegramCalendar().process(call.data)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         pass
