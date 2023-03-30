@@ -3,6 +3,10 @@ from api.api_data import url, endpoints, headers, querystring, payload
 
 
 def get_api_request() -> dict:
+    """
+    Common function for making request to API
+    :return: Response
+    """
     city_search = request(
         "GET", f'{url.get("url")}{endpoints.get("search")}',
         headers=headers.get("search"), params=querystring

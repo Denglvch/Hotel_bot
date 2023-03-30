@@ -11,7 +11,14 @@ def create_collection(
         photo_links: list = None,
         in_db=False
 ) -> list | str:
-
+    """
+    If there are photos, converts them to an InputMediaPhoto object.
+    :param user_data:
+    :param text:
+    :param photo_links:
+    :param in_db:
+    :return: list or text with hotel information
+    """
     if user_data is None:
         user_data = dict()
     if photo_links:
@@ -25,6 +32,12 @@ def create_collection(
 
 
 def get_collection(user_data: dict, hotel_list: list) -> list | str:
+    """
+        Collects and groups information about hotels.
+    :param user_data:
+    :param hotel_list:
+    :return: list or text with hotel information
+    """
     all_days = (user_data['date_out'] - user_data['date_in']).days
     for hotel in hotel_list:
         name: str = hotel['name']

@@ -1,4 +1,3 @@
-import functools
 from collections.abc import Callable
 from contextlib import suppress
 
@@ -10,6 +9,10 @@ from loader import bot
 
 
 def add_to_messages(message: Message | CallbackQuery) -> None:
+    """
+    Adds a message ID and chat ID to the message store.
+    :param message:
+    """
     if isinstance(message, CallbackQuery):
         message_id = message.message.id
         chat_id = message.message.chat.id
@@ -22,20 +25,21 @@ def add_to_messages(message: Message | CallbackQuery) -> None:
         messages[chat_id] = [message_id]
 
 
-def bot_message_hook(func: Callable) -> Callable:
-    @functools.wraps(func)
-    def wrap(*args, **kwargs) -> None:
-        bot_msg: Message = func(*args, **kwargs)
-        add_to_messages(bot_msg)
-    return wrap
-
-
-@bot_message_hook
 def bot_send_message(*args, **kwargs) -> Message:
-    return bot.send_message(*args, disable_notification=True, **kwargs)
+    """
+    Wrapper function to catch bot messages.
+    :param args:
+    :param kwargs:
+    """
+    bot_msg: Message = bot.send_message(*args, disable_notification=True, **kwargs)
+    add_to_messages(bot_msg)
+    return bot_msg
 
 
 def recording_msg(func: Callable) -> Callable:
+    """
+    Decorator to catch user messages.
+    """
     def get_msg(message: Message | CallbackQuery):
         add_to_messages(message)
         func(message)
@@ -43,6 +47,10 @@ def recording_msg(func: Callable) -> Callable:
 
 
 def del_msg(chat_id: int) -> None:
+    """
+    Deletes previous messages in a dialog.
+    :param chat_id:
+    """
     if messages.get(chat_id):
         for message_id in messages.pop(chat_id):
             with suppress(ApiTelegramException):

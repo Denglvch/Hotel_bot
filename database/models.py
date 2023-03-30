@@ -13,11 +13,17 @@ db = SqliteDatabase('history.db')
 
 
 class BaseModel(Model):
+    """
+    This class describes the underlying database model.
+    """
     class Meta:
         database = db
 
 
 class User(BaseModel):
+    """
+    The class describes the table in which user IDs should be stored.
+    """
     class Meta:
         db_table = 'users'
 
@@ -25,6 +31,9 @@ class User(BaseModel):
 
 
 class UserRequest(BaseModel):
+    """
+    The class describes a table in which the history of user requests and responses for them should be stored.
+    """
     class Meta:
         db_table = 'user_requests'
 

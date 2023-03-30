@@ -7,6 +7,9 @@ from database.models import User, UserRequest
 
 
 def db_add_user(func) -> Callable:
+    """
+    Decorator for adding a new user to the database.
+    """
     def add(message: Message | CallbackQuery) -> None:
         find_user = (
             User
@@ -26,6 +29,10 @@ def db_add_user(func) -> Callable:
 
 
 def db_add_response(func: Callable) -> Callable:
+    """
+    Decorator for adding a response to a new user request to the database
+
+    """
     def add(*args, **kwargs) -> Callable:
         result = None
         if func.__name__ == 'process':

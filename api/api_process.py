@@ -11,6 +11,12 @@ def process(
         user_data=None
 ) -> list[str | list[InputMediaPhoto]] | list[str] | str:
 
+    """
+    Common function for making request to API, do return list of response for pagination
+    :param user_data
+    :return: list of response for pagination
+    """
+
     if user_data is None:
         user_data = dict()
     check_in_out['date_in'], check_in_out['date_out'] = user_data['date_in'], user_data['date_out']
