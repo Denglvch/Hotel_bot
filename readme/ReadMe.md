@@ -19,6 +19,18 @@
 
 Запустите файл `__main__.py`.
 
+## Work example
+
+<image src="/example/image_1.png"> <image src="/example/image_2.png">
+
+<image src="/example/image_3.png"> <image src="/example/image_4.png">
+
+<image src="/example/image_5.png"> <image src="/example/image_6.png">
+
+<image src="/example/image_7.png"> <image src="/example/image_8.png">
+
+<image src="/example/image_9.png"> <image src="/example/image_10.png">
+
 # Hotels Bot
 This is simple telegram bot,
 can be used for getting information about hotels around world,
