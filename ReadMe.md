@@ -21,15 +21,15 @@
 
 ## Work example
 
-![](example\image_1.png) ![](example\image_2.png)
+![](./example/image_1.png) ![](./example/image_2.png)
 
-![](example\image_3.png) ![](example\image_4.png)
+![](./example/image_3.png) ![](./example/image_4.png)
 
-![](example\image_5.png) ![](example\image_6.png)
+![](./example/image_5.png) ![](./example/image_6.png)
 
-![](example\image_7.png) ![](example\image_8.png)
+![](./example/image_7.png) ![](./example/image_8.png)
 
-![](example\image_9.png) ![](example\image_10.png)
+![](./example/image_9.png) ![](./example/image_10.png)
 
 # Hotels Bot
 This is simple telegram bot,
